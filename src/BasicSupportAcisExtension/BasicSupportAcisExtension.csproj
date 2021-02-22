@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\..\..\..\..\..\..\..\CxCache\AcisExtensionSDK.1.0.4.1030\build\acisextensionsdk.props" Condition="Exists('..\..\..\..\..\..\..\..\..\CxCache\AcisExtensionSDK.1.0.4.1030\build\acisextensionsdk.props')" />
+  <PropertyGroup>
+    <ProjectGuid>{D56527A2-543A-47DC-9623-7B742FB4360E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BasicSupportAcisExtension</RootNamespace>
+    <AssemblyName>BasicSupportAcisExtension</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <RuntimeIdentifiers>win</RuntimeIdentifiers>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="BasicSupportExtension.cs" />
+    <Compile Include="BasicSupportWhiteListTableEntity.cs" />
+    <Compile Include="OneTimeFreeTechnicalSupportTableEntity.cs" />
+    <Compile Include="OneTimeTechnicalSupportConstants.cs" />
+    <Compile Include="OperationGroups\BasicSupportOperationGroup.cs" />
+    <Compile Include="Operations\AddOneTimeFreeTechnicalSupportOperation.cs" />
+    <Compile Include="Operations\CheckOneTimeFreeTechnicalSupportOperation.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StorageTableDataAccess.cs" />
+    <Compile Include="WhiteListConstants.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="BasicSupportAcis.prod.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BasicSupportAcis.test.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AcisExtensionSDK">
+      <Version>1.0.4.1260</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Data.Services.Client">
+      <Version>5.8.2</Version>
+    </PackageReference>
+    <PackageReference Include="WindowsAzure.Storage">
+      <Version>9.3.3</Version>
+    </PackageReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <GASMEPackageInputDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(targetframework)</GASMEPackageInputDir>
+    <GASMEPackageOutputDir>$(MSBuildProjectDirectory)\bin\GenevaActionPackages</GASMEPackageOutputDir>
+    <GAPackageName>BasicSupportAcisExtension</GAPackageName>
+    <GASMEAssembly>$(GAPackageName).dll</GASMEAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LocalSignFilesAfterTarget>GetFilesToSign</LocalSignFilesAfterTarget>
+    <!-- 
+      Use the 143360007	Microsoft Azure Dependency CodeSign certificate
+      Full list at
+      https://onebranch.visualstudio.com/Build/_wiki/wikis/Build.wiki?wikiVersion=GBwikiMaster&pagePath=%2FCode%20Sign%2FSupported%20Certificate%20List
+    -->
+    <DefaultPRSCertificate>143360007</DefaultPRSCertificate>
+  </PropertyGroup>
+  <Target Name="GetFilesToSign" BeforeTargets="PackagingGAExtension" Condition="'$(IsOfficialBuild)' != ''">
+    <ItemGroup>
+      <!-- Make sure to include all signable extensions you use -->
+      <FilesToSign Include="$(GASMEPackageInputDir)\**\*.dll" />
+      <FilesToSign Include="$(GASMEPackageInputDir)\**\*.ps*" />
+    </ItemGroup>
+  </Target>
+  <ItemGroup>
+    <GAPackageEnvironment Include="Public">
+      <SMEConfigFile>BasicSupportAcis.prod.config</SMEConfigFile>
+    </GAPackageEnvironment>
+    <GAPackageEnvironment Include="Test">
+      <SMEConfigFile>BasicSupportAcis.test.config</SMEConfigFile>
+    </GAPackageEnvironment>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+  </Target>
+  <Import Project="..\packages\AcisExtensionSDK.1.0.4.1030\build\acisextensionsdk.props" Condition="Exists('..\packages\AcisExtensionSDK.1.0.4.1030\build\acisextensionsdk.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://schema.express.azure.com/schemas/2015-01-01-alpha/RolloutSpec.json",
+  "ContentVersion": "1.0.0.0",
+  "RolloutMetadata": {
+    "ServiceModelPath": "AcisExtension.Test.ServiceModel.json",
+    "Name": "GenevaActions Service Rollout",
+    "RolloutType": "Major",
+    "BuildSource": {
+      "Parameters": {
+        "VersionFile": "BuildVer.txt"
+      }
+    },
+    "OrchestratedSteps": [
+      //publish the extension first
+      {
+        "name": "publishextension",
+        "targetType": "ServiceResource",
+        "targetName": "AcisTest",
+        "actions": [
+          "Extension/publishextension"
+        ]
+      }
+    ]
+  }
+}

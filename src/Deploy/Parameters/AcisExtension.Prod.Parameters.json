@@ -1,0 +1,56 @@
+{
+  "$schema": "http://schema.express.azure.com/schemas/2015-01-01-alpha/RolloutParameters.json",
+  "contentVersion": "1.0.0.0",
+  "MdmHealthCheckParameters": {
+    "MonitoringAccountName": "AcisProd",
+    "WaitBeforeMonitorTimeInMinutes": "5",
+    "MonitorTimeInMinutes": "5",
+    "MdmHealthCheckEndPoint": "https://prod2.metrics.nsatc.net:1886/RecoveryService",
+    "HealthResources": [
+      {
+        "Name": "HealthCheck",
+        "ResourceType": "Cloud-Extension",
+        "Dimensions": {
+          "CloudName": "testNorthUs",
+          "ExtensionName": "Basic Support"
+        }
+      }
+    ]
+  },
+  "Extensions": [
+    {
+      "name": "publishextension",
+      "type": "Microsoft.Geneva.Actions/PublishExtension",
+      "version": "2016-11-01",
+      "connectionProperties": {
+        "endpoint": "https://acis.engineering.core.windows.net/api/v2/ev2",
+        "maxExecutionTime": "PT24H",
+        "authentication": {
+          "type": "DstsServiceClientCertificateAuthentication",
+          "reference": {
+            "provider": "AzureKeyVault",
+            "parameters": {
+              "secretId": "https://acisextensionsprod.vault.azure.net/secrets/AcisAction"
+            }
+          },
+          "properties": {
+            "serviceName": "acis",
+            "metadataRelativeUri": "/api/v2/auth/claims",
+            "homeSts": "https://usnorth-dsts.dsts.core.windows.net/v2/wstrust/13/certificate",
+            "identificationType": "SubjectName"
+          }
+        }
+      },
+      "payloadProperties": {
+        "ga-extension-name": {
+          "value": "Basic Support"
+        },
+        "ga-package-reference": {
+          "reference": {
+            "path": "BasicSupportAcisExtension_Public.Package"
+          }
+        }
+      }
+    }
+  ]
+}

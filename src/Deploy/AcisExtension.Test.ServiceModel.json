@@ -1,0 +1,46 @@
+{
+  "$schema": "http://schema.express.azure.com/schemas/2015-01-01-alpha/ServiceModel.json",
+  "contentVersion": "0.0.0.1",
+  "ServiceMetadata": {
+    "ServiceGroup": "GenevaActionsService",
+    "Environment": "GA-Test"
+  },
+  "ServiceResourceGroupDefinitions": [
+    {
+      "name": "AzureSupportRp",
+      "serviceResourceDefinitions": [
+        {
+          "name": "BasicSupport",
+          "composedOf": {
+            "extension": {
+              "allowedTypes": [
+                //allow publish and execution
+                {
+                  "Type": "Microsoft.Geneva.Actions/PublishExtension"
+                },
+                {
+                  "Type": "Microsoft.Geneva.Actions/OperationExecution"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "ServiceResourceGroups": [
+    {
+      "AzureResourceGroupName": "AzureSupportRpGenevaActionsTest",
+      "AzureSubscriptionId": "5aa76f0c-95b9-42c1-8e0b-dbea7a4d1374",
+      "InstanceOf": "AzureSupportRp",
+      "Location": "CentralUS",
+      "serviceResources": [
+        {
+          "name": "AcisTest",
+          "instanceOf": "BasicSupport",
+          "RolloutParametersPath": "Parameters\\AcisExtension.Test.Parameters.json"
+        }
+      ]
+    }
+  ]
+}
