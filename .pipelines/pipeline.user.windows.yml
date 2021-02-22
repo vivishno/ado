@@ -1,0 +1,101 @@
+environment:
+  host:
+    os: 'windows'
+    flavor: 'server'
+    version: '2016'
+  runtime:
+    provider: 'appcontainer'
+    image: 'cdpxwinrs5test.azurecr.io/global/vse2019/u3/vse2019u3-winltsc2019'
+    source_mode: 'link'
+
+signing_options:
+  profile: 'azure' # Enable signing for the Azure
+  codesign_validation_glob_pattern: 'regex|.+(?:exe|dll)$;-|*.nd.dll;-|.gdn\\**'
+
+version:
+  name: 'AzureSupport-BasicSupportAcisExtension'
+  major: 1
+  minor: 0
+  tag: 'alpha'
+  system: 'patch'
+  
+restore:
+  commands:
+    - !!defaultcommand
+      name: 'Restore CSharp'
+      command: 'build\restore.cmd'
+
+build:
+  commands:
+    - !!defaultcommand
+      name: 'Configure NuGet Config'
+      command: 'build\configureNuGetConfig.cmd'
+
+    # Build the project/compile the binaries. This will also build the Geneva Actions package but
+    # we can just ignore the package that is generated for now. Signing automatically occurs on
+    # the artifacts after the Build stage is complete so these artifacts will get signed.
+    - !!buildcommand
+      name: 'Build BasicSupportAcisExtension'
+      command: 'build\build.cmd'
+      artifacts:
+        - from: 'src\BasicSupportAcisExtension'
+          include:
+            - '**/*' 
+          exclude:
+            - '**/*.Package' # Ignore the Geneva Actions package
+            
+package:
+  commands:
+    # Rebuild the Geneva Actions package by just running the Geneva Actions MSBuild target. This
+    # will rebuild the Geneva Action package with the binaries that were just signed. We enable
+    # inline signing so that signing of the Geneva Actions package occurs immediately after this 
+    # package step so we can perform whatever follow up packaging steps we want.
+    - !!buildcommand
+      name: 'Package Geneva Actions'
+      command: 'build\package-geneva-actions.cmd'
+      artifacts:
+        - from: 'src\BasicSupportAcisExtension'
+          include:
+            - '**/*.Package'
+          signing_options:
+            profile: '143360024'
+            sign_inline: true # Optional, only if you have additional packaging steps after this one.
+
+    # Not strictly related to Geneva Actions, here we are performing follow up steps. This is 
+    # performing a dotnet publish to create a zip file.
+    - !!buildcommand
+      name: 'Package BasicSupportAcisExtension'
+      command: 'build\package.cmd'
+      artifacts:
+        - from: 'src\Deploy'
+          to: 'BasicSupportAcisExtension'
+          include:
+            - '**/*'
+
+    
+package_sources:
+  nuget:
+    config_files:                               # A list of glob patterns specifying the configuration files. Use this if you already have NuGet.Config files in your repository.
+      - include:                                # Configuration files to include for automatic inference.
+        - 'nuget.config'
+      - exclude:                                # Configuration files to exclude from automatic inference.
+
+test:
+  commands:
+
+static_analysis_options:  
+  binskim_options:
+    files_to_scan:
+        - from: 'src\BasicSupportAcisExtension\bin\release'
+          exclude:
+            - '**/*.dll'
+  policheck_options:
+    files_to_scan:
+      - from: 'src\BasicSupportAcisExtension\bin\release'
+      - exclude:
+        - '**/*.json'
+        - '**/*.txt'
+        - '**/*.cs'
+        - '**/*.js'
+        - '**/*.ts'
+        - '**/*.css'
